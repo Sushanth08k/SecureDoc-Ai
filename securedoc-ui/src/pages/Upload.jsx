@@ -66,6 +66,18 @@ const Upload = () => {
     }
   }
 
+  // Make entire drop zone clickable & keyboard accessible
+  const openFileDialog = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleZoneKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      openFileDialog()
+    }
+  }
+
   const handleFileSelection = (selectedFile) => {
     const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/tiff']
     const maxSize = 10 * 1024 * 1024 // 10MB
@@ -179,6 +191,12 @@ const Upload = () => {
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
+                onClick={openFileDialog}
+                onKeyDown={handleZoneKeyDown}
+                role="button"
+                tabIndex={0}
+                aria-label="File upload area. Click or press Enter/Space, or drag and drop to upload a file."
+                aria-describedby="upload-hint"
               >
                 <input
                   ref={fileInputRef}
@@ -201,7 +219,7 @@ const Upload = () => {
                     </div>
                     <button
                       type="button"
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={(e) => { e.stopPropagation(); openFileDialog() }}
                       className="text-sm text-primary-600 hover:text-primary-700 font-medium"
                     >
                       Choose a different file
@@ -217,12 +235,12 @@ const Upload = () => {
                     <div>
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={(e) => { e.stopPropagation(); openFileDialog() }}
                         className="text-primary-600 hover:text-primary-700 font-medium"
                       >
                         Click to upload
                       </button>
-                      <span className="text-gray-500"> or drag and drop</span>
+                      <span id="upload-hint" className="text-gray-500"> or drag and drop</span>
                     </div>
                     <p className="text-sm text-gray-500">
                       PDF, PNG, JPG, TIFF up to 10MB
