@@ -1,0 +1,66 @@
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env
+.env.*
+instance/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.pytype/
+.ipynb_checkpoints/
+.python-version
+
+# Logs
+logs/
+*.log
+
+# Build & dist
+build/
+dist/
+.eggs/
+*.egg-info/
+.coverage
+
+# Docker
+*.pid
+
+# VS Code / Editor
+.vscode/
+.idea/
+
+# Frontend (securedoc-ui)
+securedoc-ui/node_modules/
+securedoc-ui/dist/
+securedoc-ui/.vite/
+securedoc-ui/.cache/
+securedoc-ui/.eslintcache
+securedoc-ui/.parcel-cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# App data
+uploads/**
+!uploads/.gitkeep
+
+tmp/
+temp/
+.cache/
+
+# Misc
+*.swp
+*.swo

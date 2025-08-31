@@ -90,7 +90,12 @@ async def upload_document(
     # Preprocess the document
     try:
         preprocessing_result = PreprocessingService.prepare_document(file_path)
-        document_cache[timestamp] = {"preprocessing": preprocessing_result}
+        # Cache document metadata for later retrieval
+        document_cache[timestamp] = {
+            "preprocessing": preprocessing_result,
+            "file_path": file_path,
+            "filename": filename,
+        }
         
         if preprocessing_result["status"] != "success":
             response["preprocessing"] = {
@@ -210,6 +215,10 @@ async def get_document_info(
         "status": "processed"
     }
     
+    # Add basic metadata
+    response["filename"] = document_info.get("filename")
+    response["original_path"] = document_info.get("file_path")
+
     # Add preprocessing info
     if "preprocessing" in document_info:
         preprocessing = document_info["preprocessing"]
@@ -258,6 +267,13 @@ async def get_document_info(
             "pages": redaction.get("pages", 0),
             "total_redactions": redaction.get("total_redactions", 0)
         }
+        # Include PDF and report info if available
+        pdf_info = document_info.get("redaction_pdf")
+        if pdf_info:
+            response["redaction"]["pdf"] = pdf_info
+        report_info = document_info.get("redaction_report")
+        if report_info:
+            response["redaction"]["report"] = report_info
     
     return response
 
@@ -342,6 +358,16 @@ async def redact_document(
             pii_results,
             report_path
         )
+        
+        # Store PDF & report metadata in cache for retrieval via /document
+        document_cache[document_id]["redaction_pdf"] = {
+            "filename": output_filename,
+            "path": output_path
+        }
+        document_cache[document_id]["redaction_report"] = {
+            "filename": report_filename,
+            "path": report_path
+        }
         
         return {
             "status": "success",

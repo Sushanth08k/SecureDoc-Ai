@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import { documentService } from '../services/api'
 
 const Preview = () => {
   const [searchParams] = useSearchParams()
@@ -21,11 +21,11 @@ const Preview = () => {
       }
       
       try {
-        const response = await axios.get(`/ingest/document/${fileId}`)
-        setDocumentData(response.data)
+        const { data } = await documentService.getDocument(fileId)
+        setDocumentData(data)
         
         // If there's a redacted version, show it by default
-        if (response.data.redaction?.pdf?.path) {
+        if (data.redaction?.pdf?.path) {
           setActiveTab('redacted')
         }
       } catch (err) {
@@ -38,6 +38,24 @@ const Preview = () => {
     
     fetchDocumentData()
   }, [fileId])
+
+  const handleProcessNow = async () => {
+    if (!fileId) return
+    setIsLoading(true)
+    setError(null)
+    try {
+      const { data } = await documentService.redactDocument(fileId)
+      // Refetch to get updated state
+      const refreshed = await documentService.getDocument(fileId)
+      setDocumentData(refreshed.data)
+      setActiveTab('redacted')
+    } catch (err) {
+      console.error('Error processing document:', err)
+      setError(err.response?.data?.message || 'Failed to process document')
+    } finally {
+      setIsLoading(false)
+    }
+  }
   
   const renderDocumentPreview = (url, title) => {
     if (!url) return null
@@ -182,6 +200,17 @@ const Preview = () => {
           </div>
           
           <div className="flex items-center space-x-3">
+            {!hasRedactedVersion && (
+              <button
+                onClick={handleProcessNow}
+                className="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors duration-200"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Process Now (Redact)
+              </button>
+            )}
             {hasRedactedVersion && (
               <button
                 onClick={() => handleDownload(redactedPath, `${fileId}_redacted.pdf`)}

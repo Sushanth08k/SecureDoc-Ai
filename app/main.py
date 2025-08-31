@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import os
 from .routers import ingest
 from .routers import audit
@@ -25,6 +26,14 @@ app.add_middleware(
 # Include routers
 app.include_router(ingest.router)
 app.include_router(audit.router)
+
+# Serve static files for uploaded and processed documents
+if os.path.isdir("uploads"):
+    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+if os.path.isdir("redacted"):
+    app.mount("/redacted", StaticFiles(directory="redacted"), name="redacted")
+if os.path.isdir("reports"):
+    app.mount("/reports", StaticFiles(directory="reports"), name="reports")
 
 @app.get("/health")
 async def health_check():
