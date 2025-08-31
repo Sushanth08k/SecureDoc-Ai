@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  securedoc_ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: securedoc_ai
+    container_name: securedoc_ai
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      # Add other environment variables as needed
+
+# Uncomment the following when adding a database
+# volumes:
+#   postgres_data:
+
+# Add database service when needed
+# db:
+#   image: postgres:13
+#   volumes:
+#     - postgres_data:/var/lib/postgresql/data
+#   environment:
+#     - POSTGRES_PASSWORD=securedoc
+#     - POSTGRES_USER=securedoc
+#     - POSTGRES_DB=securedoc_ai
