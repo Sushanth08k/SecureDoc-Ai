@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import axios from 'axios'
+import { documentService } from '../services/api'
 import { useNavigate } from 'react-router-dom'
 
 const Upload = () => {
@@ -104,12 +104,7 @@ const Upload = () => {
     setResponse(null)
     
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      
-      let url = '/ingest/upload'
       let params = {}
-      
       switch (processMode) {
         case 'ocr':
           params = { ocr: true, detect_pii: false, analyze_layout: false }
@@ -118,26 +113,20 @@ const Upload = () => {
           params = { ocr: true, detect_pii: true, analyze_layout: false }
           break
         case 'redact':
-          url = '/ingest/redact'
+          // Run full processing on upload; redaction action can follow in preview using document_id
           params = { ocr: true, detect_pii: true, analyze_layout: true }
           break
         default:
           params = { ocr: true, detect_pii: false, analyze_layout: false }
       }
-      
-      const response = await axios.post(url, formData, {
-        params,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-      
-      setResponse(response.data)
-      
-      if (processMode === 'redact' && response.data.status === 'success') {
+
+      const { data } = await documentService.uploadDocument(file, params)
+      setResponse(data)
+
+      if (processMode === 'redact' && data.document_id) {
         setTimeout(() => {
-          navigate(`/preview?file=${response.data.document_id}`)
-        }, 2000)
+          navigate(`/preview?file=${data.document_id}`)
+        }, 800)
       }
     } catch (err) {
       console.error('Error uploading document:', err)

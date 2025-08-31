@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import { auditService } from '../services/api'
 
 const AuditLogs = () => {
   const [logs, setLogs] = useState([])
@@ -16,8 +16,8 @@ const AuditLogs = () => {
   useEffect(() => {
     const fetchAuditLogs = async () => {
       try {
-        const response = await axios.get('/audit/logs')
-        setLogs(response.data)
+        const { data } = await auditService.getAuditLogs()
+        setLogs(Array.isArray(data) ? data : [])
       } catch (err) {
         console.error('Error fetching audit logs:', err)
         setError(err.response?.data?.message || 'Failed to fetch audit logs')
@@ -25,7 +25,6 @@ const AuditLogs = () => {
         setIsLoading(false)
       }
     }
-    
     fetchAuditLogs()
   }, [])
   

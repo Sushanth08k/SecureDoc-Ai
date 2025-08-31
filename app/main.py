@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from .routers import ingest
+from .routers import audit
 
 # Create uploads directory if it doesn't exist
 os.makedirs("uploads", exist_ok=True)
@@ -23,6 +24,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(ingest.router)
+app.include_router(audit.router)
 
 @app.get("/health")
 async def health_check():
